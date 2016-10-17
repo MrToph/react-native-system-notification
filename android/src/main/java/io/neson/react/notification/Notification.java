@@ -271,7 +271,7 @@ public class Notification {
 
         if (attributes.vibrate != null) {
             // delay, vibrate, sleep, vibrate, sleep
-            long[] pattern = {0, 1000, 1000, 1000, 1000}
+            long[] pattern = {0, 1000, 1000, 1000, 1000};
             notificationBuilder.setVibrate(pattern);
         }
 
