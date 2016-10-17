@@ -269,7 +269,15 @@ public class Notification {
             notificationBuilder.setSound(Uri.parse(attributes.sound));
         }
 
+        if (attributes.vibrate != null) {
+            // delay, vibrate, sleep, vibrate, sleep
+            long[] pattern = {0, 1000, 1000, 1000, 1000}
+            notificationBuilder.setVibrate(pattern);
+        }
 
+        if (attributes.lights != null) {
+            notificationBuilder.setLights(Color.RED, 1500, 1500);
+        }
 
         return notificationBuilder.build();
     }
