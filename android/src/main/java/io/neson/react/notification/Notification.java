@@ -373,7 +373,7 @@ public class Notification {
     private void setExact(int type, long triggerAtMillis, PendingIntent pendingIntent){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             getAlarmManager().setExactAndAllowWhileIdle(type, triggerAtMillis, pendingIntent);
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
             getAlarmManager().setExact(type, triggerAtMillis, pendingIntent);
         else
             getAlarmManager().set(type, triggerAtMillis, pendingIntent);
