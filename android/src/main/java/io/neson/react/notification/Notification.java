@@ -315,7 +315,7 @@ public class Notification {
         PendingIntent pendingIntent = getScheduleNotificationIntent();
 
         long futureInMillis = SystemClock.elapsedRealtime() + attributes.delay;
-        getAlarmManager().setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        this.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
 
         Log.i("ReactSystemNotification", "Notification Delay Alarm Set: " + id + ", Repeat Type: " + attributes.repeatType + ", Current Time: " + System.currentTimeMillis() + ", Delay: " + attributes.delay);
     }
@@ -327,7 +327,7 @@ public class Notification {
         PendingIntent pendingIntent = getScheduleNotificationIntent();
 
         if (attributes.repeatType == null) {
-            getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, attributes.sendAt, pendingIntent);
+            this.setExact(AlarmManager.RTC_WAKEUP, attributes.sendAt, pendingIntent);
             Log.i("ReactSystemNotification", "Set One-Time Alarm: " + id);
 
         } else {
@@ -368,6 +368,15 @@ public class Notification {
         }
 
         Log.i("ReactSystemNotification", "Notification Schedule Alarm Set: " + id + ", Repeat Type: " + attributes.repeatType + ", Current Time: " + System.currentTimeMillis() + ", First Send At: " + attributes.sendAt);
+    }
+
+    private void setExact(int type, long triggerAtMillis, PendingIntent pendingIntent){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            getAlarmManager().setExactAndAllowWhileIdle(type, triggerAtMillis, pendingIntent);
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            getAlarmManager().setExact(type, triggerAtMillis, pendingIntent);
+        else
+            getAlarmManager().set(type, triggerAtMillis, pendingIntent);
     }
 
     /**
