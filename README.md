@@ -1,6 +1,13 @@
 # react-native-system-notification [![npm version](https://img.shields.io/npm/v/react-native-system-notification.svg?style=flat-square)](https://www.npmjs.com/package/react-native-system-notification)
 
 Send or schedule Android system notifications for React Native.
+## Changes in this fork
+This fork provides timer-like local notifications that fire exactly within minutes.
+ * Only does local notifications and removed the requirements for gcm
+ * The notifications lights now work and pulsate red
+ * The notifications have a vibrate pattern
+ * Uses the `AlarmManager.setExact` such that the delayed/scheduled notifications fire off exactly at that time instead of up to minutes later
+ * Removed the BOOT_RECEIVED permission dependency and the ability to load notifications upon boot
 
 <img width="35%" align="right" hspace="1" vspace="1" src="http://i.imgur.com/cY2Z9GH.png"></img>
 
@@ -92,7 +99,6 @@ dependencies {
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_TASKS" />                       <!-- <- Add this line -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>           <!-- <- Add this line -->
     <uses-permission android:name="android.permission.VIBRATE"/>                          <!-- <- Add this line -->
 
     <application
@@ -105,18 +111,12 @@ dependencies {
 
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
       <receiver android:name="io.neson.react.notification.NotificationEventReceiver" />   <!-- <- Add this line -->
-      <receiver android:name="io.neson.react.notification.NotificationPublisher" />       <!-- <- Add this line -->
-      <receiver android:name="io.neson.react.notification.SystemBootEventReceiver">       <!-- <- Add this line -->
-        <intent-filter>                                                                   <!-- <- Add this line -->
-          <action android:name="android.intent.action.BOOT_COMPLETED"></action>           <!-- <- Add this line -->
-        </intent-filter>                                                                  <!-- <- Add this line -->
-      </receiver>                                                                         <!-- <- Add this line -->
+      <receiver android:name="io.neson.react.notification.NotificationPublisher" />       <!-- <- Add this line -->                                                              <!-- <- Add this line -->
     </application>
 
 </manifest>
 ```
 
-> The `RECEIVE_BOOT_COMPLETED` permission is used to re-register all scheduled notifications after reboot.
 > Requesting `VIBRATE` permission is required if you want to make the device vibrate while sending notifications.
 
 - Edit `MainActivity.java` (usually at `android/app/src/main/java/com/<project-name>/MainActivity.java`) and add the annoated lines as below:
