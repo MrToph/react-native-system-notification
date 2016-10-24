@@ -7,9 +7,9 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.app.Activity;
 
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Arguments;
@@ -21,15 +21,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.LifecycleEventListener;
 
-import io.neson.react.notification.NotificationManager;
-import io.neson.react.notification.Notification;
-import io.neson.react.notification.NotificationAttributes;
-import io.neson.react.notification.NotificationEventReceiver;
-
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Map;
 
 import android.util.Log;
 
@@ -38,7 +30,7 @@ import android.util.Log;
  *
  * Provides JS accessible API, bridge Java and JavaScript.
  */
-public class NotificationModule extends ReactContextBaseJavaModule {
+public class NotificationModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
     final static String PREFERENCES_KEY = "ReactNativeSystemNotification";
     public Context mContext = null;
     public NotificationManager mNotificationManager = null;
@@ -57,7 +49,7 @@ public class NotificationModule extends ReactContextBaseJavaModule {
         this.mContext = reactContext;
         this.mNotificationManager = (NotificationManager) new NotificationManager(reactContext);
 
-        listenNotificationEvent();
+        reactContext.addLifecycleEventListener(this);
     }
 
     /**
@@ -65,10 +57,10 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rCreate(
-        Integer notificationID,
-        ReadableMap notificationAttributes,
-        Callback errorCallback,
-        Callback successCallback
+            Integer notificationID,
+            ReadableMap notificationAttributes,
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             NotificationAttributes a = getNotificationAttributesFromReadableMap(notificationAttributes);
@@ -87,8 +79,8 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rGetIDs(
-        Callback errorCallback,
-        Callback successCallback
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             ArrayList<Integer> ids = mNotificationManager.getIDs();
@@ -111,9 +103,9 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rFind(
-        Integer notificationID,
-        Callback errorCallback,
-        Callback successCallback
+            Integer notificationID,
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             Notification n = mNotificationManager.find(notificationID);
@@ -130,9 +122,9 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rDelete(
-        int notificationID,
-        Callback errorCallback,
-        Callback successCallback
+            int notificationID,
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             Notification n = mNotificationManager.delete(notificationID);
@@ -150,8 +142,8 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rDeleteAll(
-        Callback errorCallback,
-        Callback successCallback
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             ArrayList<Integer> ids = mNotificationManager.getIDs();
@@ -177,9 +169,9 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rClear(
-        int notificationID,
-        Callback errorCallback,
-        Callback successCallback
+            int notificationID,
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             Notification n = mNotificationManager.clear(notificationID);
@@ -197,8 +189,8 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      */
     @ReactMethod
     public void rClearAll(
-        Callback errorCallback,
-        Callback successCallback
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             mNotificationManager.clearAll();
@@ -212,8 +204,8 @@ public class NotificationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void rGetApplicationName(
-        Callback errorCallback,
-        Callback successCallback
+            Callback errorCallback,
+            Callback successCallback
     ) {
         try {
             int stringId = getReactApplicationContext().getApplicationInfo().labelRes;
@@ -229,12 +221,12 @@ public class NotificationModule extends ReactContextBaseJavaModule {
      * Emit JavaScript events.
      */
     private void sendEvent(
-        String eventName,
-        Object params
+            String eventName,
+            Object params
     ) {
         getReactApplicationContext()
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit(eventName, params);
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
 
         Log.i("ReactSystemNotification", "NotificationModule: sendEvent (to JS): " + eventName);
     }
@@ -244,9 +236,9 @@ public class NotificationModule extends ReactContextBaseJavaModule {
         final Activity activity = getCurrentActivity();
 
         if (activity == null) {
-          return;
+            return;
         }
-        
+
         Intent intent = activity.getIntent();
         Bundle extras = intent.getExtras();
 
@@ -258,22 +250,22 @@ public class NotificationModule extends ReactContextBaseJavaModule {
             }
         }
     }
-    
+
     @ReactMethod
     public void removeInitialSysNotification() {
         final Activity activity = getCurrentActivity();
 
-      if (activity == null) {
-        return;
-      }
-      
-      activity.getIntent().removeExtra("initialSysNotificationId");
-      activity.getIntent().removeExtra("initialSysNotificationAction");
-      activity.getIntent().removeExtra("initialSysNotificationPayload");
+        if (activity == null) {
+            return;
+        }
+
+        activity.getIntent().removeExtra("initialSysNotificationId");
+        activity.getIntent().removeExtra("initialSysNotificationAction");
+        activity.getIntent().removeExtra("initialSysNotificationPayload");
     }
 
     private NotificationAttributes getNotificationAttributesFromReadableMap(
-        ReadableMap readableMap
+            ReadableMap readableMap
     ) {
         NotificationAttributes notificationAttributes = new NotificationAttributes();
 
@@ -282,23 +274,37 @@ public class NotificationModule extends ReactContextBaseJavaModule {
         return notificationAttributes;
     }
 
-    private void listenNotificationEvent() {
-        IntentFilter intentFilter = new IntentFilter("NotificationEvent");
+    private IntentFilter intentFilter = new IntentFilter(NotificationEventReceiver.INTENT_ID);
+    private BroadcastReceiver intentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
 
-        getReactApplicationContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
+            Bundle extras = intent.getExtras();
 
-                Bundle extras = intent.getExtras();
+            WritableMap params = Arguments.createMap();
+            params.putInt("notificationID", extras.getInt(NotificationEventReceiver.NOTIFICATION_ID));
+            params.putString("action", extras.getString(NotificationEventReceiver.ACTION));
+            params.putString("payload", extras.getString(NotificationEventReceiver.PAYLOAD));
 
-                WritableMap params = Arguments.createMap();
-                params.putInt("notificationID", extras.getInt(NotificationEventReceiver.NOTIFICATION_ID));
-                params.putString("action", extras.getString(NotificationEventReceiver.ACTION));
-                params.putString("payload", extras.getString(NotificationEventReceiver.PAYLOAD));
+            sendEvent("sysModuleNotificationClick", params);
 
-                sendEvent("sysModuleNotificationClick", params);
-            }
-        }, intentFilter);
+            this.setResultCode(Activity.RESULT_OK);
+        }
+    };
+
+    // Activity lifecycle
+
+    public void onHostResume() {
+        mContext.registerReceiver(intentReceiver, intentFilter);
+    }
+
+    public void onHostPause() {
+        mContext.unregisterReceiver(intentReceiver);
+    }
+
+    public void onHostDestroy() {
+        // Nothing to do; intentReceiver will already have been unregistered by this point
+        // in the lifecycle.
     }
 
 }

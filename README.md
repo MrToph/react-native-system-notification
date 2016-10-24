@@ -8,6 +8,7 @@ This fork provides timer-like local notifications that fire exactly within minut
  * The notifications have a vibrate pattern
  * Uses the `AlarmManager.setExact` such that the delayed/scheduled notifications fire off exactly at that time instead of up to minutes later
  * Removed the BOOT_RECEIVED permission dependency and the ability to load notifications upon boot
+ * Removed the GET_TASKS permission dependency
 
 <img width="35%" align="right" hspace="1" vspace="1" src="http://i.imgur.com/cY2Z9GH.png"></img>
 
