@@ -2,7 +2,7 @@
 
 Send or schedule Android system notifications for React Native.
 ## Changes in this fork
-This fork provides timer-like local notifications that fire exactly within minutes.
+This fork provides timer-like local notifications that fire exactly on time instead of within minutes. It achieves that without relying on any app permissions.
  * Only does local notifications and removed the requirements for gcm
  * The notifications lights now work and pulsate red
  * The notifications have a vibrate pattern
